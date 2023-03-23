@@ -61,11 +61,28 @@ resource "aws_autoscaling_group" "otoskeyil" {
 }
 
 
-#resource "aws_lb" "loadbalancerim" {
-#  name = "otoskeyil_loadbalancer"
-#  load_balancer_type = "application"
-#  subnets = data.
-#}
+resource "aws_lb" "loadbalancerim" {
+  name = "otoscaleloadbalancer"
+  load_balancer_type = "application"
+  subnets = [data.aws_subnets.benimSubnetler.id]
+}
+
+resource "aws_lb_listener" "http" {
+    load_balancer_arn = aws_lb.loadbalancerim.arn
+    port = 80
+    protocol = "HTTP"
+
+    default_action {
+        type = "fixed-response"
+
+        fixed_fixed_response {
+          content_type = "text/plain"
+          message_body = "404:sayfa yok"
+          status_code = 404
+        }        
+    }
+}
+
 
 
 #########################
@@ -80,18 +97,14 @@ resource "aws_autoscaling_group" "otoskeyil" {
 
 ###########DATA############
 
-
-
-#data "aws_vpc" "temel" {
-#    default = true
-#}
+data "aws_vpc" "temel" {
+    default = true
+}
 
 
 data "aws_subnets" "benimSubnetler" {
 
 }
-
-
 ###############################
 
 
@@ -120,9 +133,10 @@ output "sgismi" {
 }
 
 
-#output "vpcaydi" {
-#  value = data.aws_vpc.temel.id
-#}
+output "vpcaydi" {
+  value = data.aws_vpc.temel.id
+}
+
 
 output "sabnetler"{
     value = data.aws_subnets.benimSubnetler
