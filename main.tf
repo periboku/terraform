@@ -7,6 +7,9 @@ provider "aws" {
 
 
 
+
+
+
 #########RESOURCES#################
 
 resource "aws_instance" "yaramiyeooo" {
@@ -60,28 +63,65 @@ resource "aws_autoscaling_group" "otoskeyil" {
     }
 }
 
-
-resource "aws_lb" "loadbalancerim" {
-  name = "otoscaleloadbalancer"
-  load_balancer_type = "application"
-  subnets = [data.aws_subnets.benimSubnetler.id]
-}
-
-resource "aws_lb_listener" "http" {
-    load_balancer_arn = aws_lb.loadbalancerim.arn
-    port = 80
-    protocol = "HTTP"
-
-    default_action {
-        type = "fixed-response"
-
-        fixed_fixed_response {
-          content_type = "text/plain"
-          message_body = "404:sayfa yok"
-          status_code = 404
-        }        
+resource "aws_s3_bucket" "terraform-state" {
+    bucket = "terraform-state-bucket"
+    
+    # yanlışlıkla silmeyi engellemek için
+    lifecycle {
+      prevent_destroy = true
     }
 }
+
+resource "aws_s3_bucket_acl" "terraform-state-bucket-acl" {
+    bucket = aws_s3_bucket.terraform-state.id
+    acl = "private"
+}
+
+resource "aws_s3_bucket_versioning" "versiyonlama" {
+    bucket = aws_s3_bucket.terraform-state.id
+    versioning_configuration {
+      status = "Enabled"
+    }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket-sifreleme" {
+    bucket = aws_s3_bucket.terraform-state.id
+
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  
+}
+
+
+
+
+
+
+
+#resource "aws_lb" "loadbalancerim" {
+#  name = "otoscaleloadbalancer"
+#  load_balancer_type = "application"
+#  subnets = [data.aws_subnets.benimSubnetler.id]
+#}
+#
+#resource "aws_lb_listener" "http" {
+#    load_balancer_arn = aws_lb.loadbalancerim.arn
+#    port = 80
+#    protocol = "HTTP"
+#
+#    default_action {
+#        type = "fixed-response"
+#
+#        fixed_fixed_response {
+#          content_type = "text/plain"
+#          message_body = "404:sayfa yok"
+#          status_code = 404
+#        }        
+#    }
+#}
 
 
 
